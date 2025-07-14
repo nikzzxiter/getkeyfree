@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GetRandomKeyFreeNkz</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-light: #e0e7ff;
+            --secondary: #3f37c9;
+            --success: #4cc9f0;
+            --danger: #f72585;
+            --warning: #f8961e;
+            --dark: #212529;
+            --light: #f8f9fa;
+            --gray: #6c757d;
+            --white: #ffffff;
+            --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f5f7ff;
+            color: var(--dark);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .logo {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .tagline {
+            color: var(--gray);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+
+        @media (min-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .card {
+            background-color: var(--white);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: var(--card-shadow);
+            transition: var(--transition);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .card-icon {
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+
+        .btn {
+            display: inline-block;
+            background-color: var(--primary);
+            color: var(--white);
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            text-align: center;
+            text-decoration: none;
+        }
+
+        .btn:hover {
+            background-color: var(--secondary);
+            transform: translateY(-2px);
+        }
+
+        .btn-block {
+            display: block;
+            width: 100%;
+        }
+
+        .btn-secondary {
+            background-color: var(--light);
+            color: var(--dark);
+        }
+
+        .btn-secondary:hover {
+            background-color: #e9ecef;
+        }
+
+        .key-display {
+            background-color: var(--primary-light);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            font-family: 'Courier New', monospace;
+            font-size: 1.2rem;
+            font-weight: 600;
+            word-break: break-all;
+            position: relative;
+        }
+
+        .key-display::before {
+            content: "YOUR KEY";
+            position: absolute;
+            top: -10px;
+            left: 20px;
+            background-color: var(--white);
+            padding: 0 10px;
+            font-size: 0.8rem;
+            color: var(--gray);
+            font-weight: normal;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-card {
+            background-color: var(--light);
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--gray);
+        }
+
+        .rating-stats {
+            margin-top: 2rem;
+        }
+
+        .rating-stats h3 {
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .rating-bar {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .rating-star {
+            color: var(--warning);
+            margin-right: 0.5rem;
+            width: 20px;
+            text-align: center;
+        }
+
+        .rating-count {
+            font-weight: 500;
+            margin-left: 0.5rem;
+        }
+
+        .rating-progress {
+            flex-grow: 1;
+            height: 10px;
+            background-color: #e9ecef;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .rating-progress-bar {
+            height: 100%;
+            background-color: var(--warning);
+        }
+
+        .expiry-info {
+            background-color: var(--primary-light);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1.5rem;
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--dark);
+        }
+
+        .expiry-info i {
+            color: var(--warning);
+            margin-right: 0.5rem;
+        }
+
+        .divider {
+            height: 1px;
+            background-color: #e9ecef;
+            margin: 1.5rem 0;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 3rem;
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: var(--dark);
+            color: var(--white);
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            box-shadow: var(--card-shadow);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: var(--transition);
+            z-index: 1000;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .loader {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: var(--white);
+            animation: spin 1s ease-in-out infinite;
+            margin-left: 10px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">GET FREE KEY NKZ</div>
+            <p class="tagline">Generate Free access keys with 24-hour validity. Get your key now and enjoy exclusive injector features!</p>
+        </header>
+
+        <div class="dashboard">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Generate Key</h2>
+                    <i class="fas fa-key card-icon"></i>
+                </div>
+                
+                <div class="key-display" id="key-display">
+                    Click "Generate Key" to create your premium access key
+                </div>
+                
+                <button class="btn btn-block" id="generate-btn">
+                    <span id="btn-text">Generate Key</span>
+                    <span class="loader" id="loader" style="display: none;"></span>
+                </button>
+                
+                <div class="divider"></div>
+                
+                <button class="btn btn-secondary btn-block" id="download-btn">
+                    <i class="fas fa-download"></i> Download APK
+                </button>
+                
+                <div class="expiry-info">
+                    <i class="fas fa-clock"></i> This key will expire in 24 hours after generation
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Device Statistics</h2>
+                    <i class="fas fa-mobile-alt card-icon"></i>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="total-devices">0</div>
+                        <div class="stat-label">Total Devices Installed</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="rated-devices">0</div>
+                        <div class="stat-label">Devices Rated</div>
+                    </div>
+                </div>
+                
+                <div class="rating-stats">
+                    <h3>Rating Distribution</h3>
+                    
+                    <div id="rating-bars">
+                        <div class="rating-bar">
+                            <span class="rating-star">1</span>
+                            <div class="rating-progress">
+                                <div class="rating-progress-bar" id="rating-1-bar" style="width: 0%"></div>
+                            </div>
+                            <span class="rating-count" id="rating-1-count">0</span>
+                        </div>
+                        <div class="rating-bar">
+                            <span class="rating-star">2</span>
+                            <div class="rating-progress">
+                                <div class="rating-progress-bar" id="rating-2-bar" style="width: 0%"></div>
+                            </div>
+                            <span class="rating-count" id="rating-2-count">0</span>
+                        </div>
+                        <div class="rating-bar">
+                            <span class="rating-star">3</span>
+                            <div class="rating-progress">
+                                <div class="rating-progress-bar" id="rating-3-bar" style="width: 0%"></div>
+                            </div>
+                            <span class="rating-count" id="rating-3-count">0</span>
+                        </div>
+                        <div class="rating-bar">
+                            <span class="rating-star">4</span>
+                            <div class="rating-progress">
+                                <div class="rating-progress-bar" id="rating-4-bar" style="width: 0%"></div>
+                            </div>
+                            <span class="rating-count" id="rating-4-count">0</span>
+                        </div>
+                        <div class="rating-bar">
+                            <span class="rating-star">5</span>
+                            <div class="rating-progress">
+                                <div class="rating-progress-bar" id="rating-5-bar" style="width: 0%"></div>
+                            </div>
+                            <span class="rating-count" id="rating-5-count">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>&copy; 2025 GetKeyFree Nkz. All rights reserved.</p>
+        </footer>
+    </div>
+    
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // Firebase configuration with secret key
+        const SECRET_KEY = "r5tu4b89oNfhZhdsaexe0jQLT3p4UJ3jKyHBXUXD";
+        const DATABASE_URL = "https://nkz-free-user-inject-default-rtdb.firebaseio.com/";
+        
+        const firebaseConfig = {
+            apiKey: "AIzaSyDCJvueWzx5MEgXpzL_Hj-6yEZIqtBSm5s",
+            authDomain: "nkz-free-user-inject.firebaseapp.com",
+            databaseURL: DATABASE_URL,
+            projectId: "nkz-free-user-inject",
+            storageBucket: "nkz-free-user-inject.firebasestorage.app",
+            messagingSenderId: "630272173694",
+            appId: "1:630272173694:android:0843fa11ef6488bf0d9a2f"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // Function to authenticate with secret key
+        function authenticateWithSecretKey() {
+            // Create a custom token using the secret key
+            // In a real implementation, you would need a backend service to generate this token
+            // This is a simplified approach for demonstration
+            return new Promise((resolve) => {
+                // Simulate authentication
+                setTimeout(() => {
+                    resolve(true);
+                }, 500);
+            });
+        }
+
+        // DOM elements
+        const keyDisplay = document.getElementById('key-display');
+        const generateBtn = document.getElementById('generate-btn');
+        const downloadBtn = document.getElementById('download-btn');
+        const btnText = document.getElementById('btn-text');
+        const loader = document.getElementById('loader');
+        const totalDevicesEl = document.getElementById('total-devices');
+        const ratedDevicesEl = document.getElementById('rated-devices');
+        const toast = document.getElementById('toast');
+
+        // Current key data
+        let currentKey = null;
+        let generatedKey = null;
+        
+        // APK download link
+        const APK_DOWNLOAD_LINK = "intent://www.tiktok.com/@nikzzreall2.0?_t=ZS-8wYd4JteP5U&_r=1#Intent;package=com.ss.android.ugc.trill;scheme=https;end";
+
+        // Generate random key
+        function generateRandomKey() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let key = '';
+            for (let i = 0; i < 16; i++) {
+                if (i > 0 && i % 4 === 0) key += '-';
+                key += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return key;
+        }
+
+        // Show toast message
+        function showToast(message, duration = 3000) {
+            toast.textContent = message;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, duration);
+        }
+
+        // Update rating statistics
+        function updateRatingStats(ratings) {
+            const ratedDevices = Object.keys(ratings).length;
+            ratedDevicesEl.textContent = ratedDevices;
+
+            // Count each star rating
+            const ratingCounts = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0};
+            Object.values(ratings).forEach(rating => {
+                const stars = rating.rating || 0;
+                if (stars >= 1 && stars <= 5) {
+                    ratingCounts[stars]++;
+                }
+            });
+
+            // Find max count for percentage calculation
+            const maxCount = Math.max(...Object.values(ratingCounts));
+
+            // Update UI for each rating
+            for (let i = 1; i <= 5; i++) {
+                const count = ratingCounts[i];
+                document.getElementById(`rating-${i}-count`).textContent = count;
+                
+                // Calculate percentage width for progress bar
+                const percentage = maxCount > 0 ? (count / maxCount) * 100 : 0;
+                document.getElementById(`rating-${i}-bar`).style.width = `${percentage}%`;
+            }
+        }
+
+        // Initialize real-time listeners with authentication
+        function initRealTimeListeners() {
+            authenticateWithSecretKey().then(() => {
+                // Device install listener
+                database.ref('userStatus').on('value', (snapshot) => {
+                    const devices = snapshot.val() || {};
+                    totalDevicesEl.textContent = Object.keys(devices).length;
+                }, (error) => {
+                    console.error("Error reading userStatus:", error);
+                });
+
+                // Rating data listener
+                database.ref('rattinguser').on('value', (snapshot) => {
+                    const ratings = snapshot.val() || {};
+                    updateRatingStats(ratings);
+                }, (error) => {
+                    console.error("Error reading rating data:", error);
+                });
+            }).catch(error => {
+                console.error("Authentication failed:", error);
+                showToast("Failed to connect to server", 5000);
+            });
+        }
+
+        // Generate key button click handler with authentication
+        generateBtn.addEventListener('click', () => {
+            btnText.textContent = 'Generating...';
+            loader.style.display = 'inline-block';
+            generateBtn.disabled = true;
+            
+            // First authenticate
+            authenticateWithSecretKey().then(() => {
+                // Simulate generation delay
+                setTimeout(() => {
+                    generatedKey = generateRandomKey();
+                    const timestamp = Date.now();
+                    
+                    // Save to Firebase with additional security
+                    const keyRef = database.ref('generatedKeys/' + generatedKey);
+                    
+                    // Create a special token using the secret key
+                    const securityToken = btoa(SECRET_KEY + ":" + generatedKey + ":" + timestamp);
+                    
+                    keyRef.set({
+                        key: generatedKey,
+                        generatedAt: timestamp,
+                        expiresAt: timestamp + (24 * 60 * 60 * 1000), // 24 hours from now
+                        isUsed: false,
+                        rating: 0,
+                        securityToken: securityToken
+                    }).then(() => {
+                        keyDisplay.textContent = generatedKey;
+                        currentKey = generatedKey;
+                        showToast('Key generated successfully!');
+                    }).catch(error => {
+                        showToast('Error saving key: ' + error.message, 5000);
+                    }).finally(() => {
+                        btnText.textContent = 'Generate Key';
+                        loader.style.display = 'none';
+                        generateBtn.disabled = false;
+                    });
+                }, 1000);
+            }).catch(error => {
+                showToast('Authentication failed. Please try again.', 3000);
+                btnText.textContent = 'Generate Key';
+                loader.style.display = 'none';
+                generateBtn.disabled = false;
+            });
+        });
+
+        // Download APK button click handler
+        downloadBtn.addEventListener('click', () => {
+            if (!APK_DOWNLOAD_LINK) {
+                showToast('Download link not configured', 3000);
+                return;
+            }
+            
+            // Redirect to APK download link
+            window.location.href = APK_DOWNLOAD_LINK;
+            
+            // Optional: Track the download in Firebase
+            if (generatedKey) {
+                database.ref('downloads/' + generatedKey).set({
+                    downloadedAt: Date.now(),
+                    key: generatedKey
+                }).catch(error => {
+                    console.error("Error tracking download:", error);
+                });
+            }
+        });
+
+        // Initialize the app
+        initRealTimeListeners();
+    </script>
+</body>
+</html>
