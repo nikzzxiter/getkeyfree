@@ -22,6 +22,23 @@
             --white: #ffffff;
             --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             --transition: all 0.3s ease;
+            
+            /* Dark mode variables */
+            --bg-color: #f5f7ff;
+            --text-color: var(--dark);
+            --card-bg: var(--white);
+        }
+
+        /* Dark mode styles */
+        body.dark-mode {
+            --bg-color: #121212;
+            --text-color: #e0e0e0;
+            --card-bg: #1e1e1e;
+            --dark: #e0e0e0;
+            --light: #2d2d2d;
+            --gray: #9e9e9e;
+            --primary-light: #2a3a7a;
+            --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
         }
 
         * {
@@ -32,15 +49,18 @@
 
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f5f7ff;
-            color: var(--dark);
+            background-color: var(--bg-color);
+            color: var(--text-color);
             line-height: 1.6;
+            transition: var(--transition);
         }
 
         .container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 2rem;
+            position: relative;
+            min-height: 100vh;
         }
 
         header {
@@ -75,7 +95,7 @@
         }
 
         .card {
-            background-color: var(--white);
+            background-color: var(--card-bg);
             border-radius: 12px;
             padding: 2rem;
             box-shadow: var(--card-shadow);
@@ -150,6 +170,7 @@
             font-weight: 600;
             word-break: break-all;
             position: relative;
+            min-height: 80px;
         }
 
         .key-display::before {
@@ -157,12 +178,37 @@
             position: absolute;
             top: -10px;
             left: 20px;
-            background-color: var(--white);
+            background-color: var(--card-bg);
             padding: 0 10px;
             font-size: 0.8rem;
             color: var(--gray);
             font-weight: normal;
             font-family: 'Inter', sans-serif;
+        }
+
+        .copy-btn-container {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+        }
+
+        .copy-btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 0.25rem 0.5rem;
+            font-size: 0.7rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .copy-btn:hover {
+            background-color: var(--secondary);
+        }
+
+        .copy-btn i {
+            margin-right: 0.25rem;
         }
 
         .stats-grid {
@@ -221,7 +267,7 @@
         .rating-progress {
             flex-grow: 1;
             height: 10px;
-            background-color: #e9ecef;
+            background-color: var(--light);
             border-radius: 5px;
             overflow: hidden;
         }
@@ -248,7 +294,7 @@
 
         .divider {
             height: 1px;
-            background-color: #e9ecef;
+            background-color: var(--light);
             margin: 1.5rem 0;
         }
 
@@ -293,6 +339,34 @@
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
+
+        /* Dark mode toggle in bottom right */
+        .theme-toggle-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 999;
+        }
+
+        .theme-toggle {
+            background-color: var(--primary);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            transition: var(--transition);
+            border: none;
+        }
+
+        .theme-toggle:hover {
+            background-color: var(--secondary);
+            transform: scale(1.1);
+        }
     </style>
 </head>
 <body>
@@ -311,6 +385,11 @@
                 
                 <div class="key-display" id="key-display">
                     Click "Generate Key" to create your premium access key
+                    <div class="copy-btn-container">
+                        <button class="copy-btn" id="copy-btn">
+                            <i class="fas fa-copy"></i> Copy
+                        </button>
+                    </div>
                 </div>
                 
                 <button class="btn btn-block" id="generate-btn">
@@ -395,6 +474,12 @@
         </footer>
     </div>
     
+    <div class="theme-toggle-container">
+        <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode">
+            <i class="fas fa-moon"></i>
+        </button>
+    </div>
+    
     <div class="toast" id="toast"></div>
 
     <script>
@@ -418,11 +503,7 @@
 
         // Function to authenticate with secret key
         function authenticateWithSecretKey() {
-            // Create a custom token using the secret key
-            // In a real implementation, you would need a backend service to generate this token
-            // This is a simplified approach for demonstration
             return new Promise((resolve) => {
-                // Simulate authentication
                 setTimeout(() => {
                     resolve(true);
                 }, 500);
@@ -438,6 +519,8 @@
         const totalDevicesEl = document.getElementById('total-devices');
         const ratedDevicesEl = document.getElementById('rated-devices');
         const toast = document.getElementById('toast');
+        const copyBtn = document.getElementById('copy-btn');
+        const themeToggle = document.getElementById('theme-toggle');
 
         // Current key data
         let currentKey = null;
@@ -445,6 +528,26 @@
         
         // APK download link
         const APK_DOWNLOAD_LINK = "intent://www.tiktok.com/@nikzzreall2.0?_t=ZS-8wYd4JteP5U&_r=1#Intent;package=com.ss.android.ugc.trill;scheme=https;end";
+
+        // Check for saved theme preference
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+            document.body.classList.add('dark-mode');
+            themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+        }
+
+        // Theme toggle functionality
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            
+            if (document.body.classList.contains('dark-mode')) {
+                localStorage.setItem('theme', 'dark');
+                themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+            } else {
+                localStorage.setItem('theme', 'light');
+                themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+            }
+        });
 
         // Generate random key
         function generateRandomKey() {
@@ -466,6 +569,21 @@
                 toast.classList.remove('show');
             }, duration);
         }
+
+        // Copy key to clipboard
+        function copyToClipboard() {
+            if (!generatedKey) return;
+            
+            navigator.clipboard.writeText(generatedKey).then(() => {
+                showToast('Key copied to clipboard!');
+            }).catch(err => {
+                showToast('Failed to copy key', 3000);
+                console.error('Could not copy text: ', err);
+            });
+        }
+
+        // Setup copy button
+        copyBtn.addEventListener('click', copyToClipboard);
 
         // Update rating statistics
         function updateRatingStats(ratings) {
@@ -546,8 +664,20 @@
                         rating: 0,
                         securityToken: securityToken
                     }).then(() => {
-                        keyDisplay.textContent = generatedKey;
+                        keyDisplay.innerHTML = `
+                            <span id="generated-key">${generatedKey}</span>
+                            <div class="copy-btn-container">
+                                <button class="copy-btn" id="copy-btn" style="display: block;">
+                                    <i class="fas fa-copy"></i> Copy
+                                </button>
+                            </div>
+                        `;
                         currentKey = generatedKey;
+                        document.getElementById('copy-btn').addEventListener('click', () => {
+                            navigator.clipboard.writeText(currentKey)
+                                .then(() => showToast('Key copied to clipboard!'))
+                                .catch(() => showToast('Copy failed.'));
+                        });
                         showToast('Key generated successfully!');
                     }).catch(error => {
                         showToast('Error saving key: ' + error.message, 5000);
